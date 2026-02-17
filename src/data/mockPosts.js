@@ -1,0 +1,35 @@
+export const MOCK_POSTS = [
+  {
+    id: 'mock_1',
+    userId: 101,
+    username: 'DesignPixel',
+    profilePic: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200',
+    content: 'Loving the new Glassy UI vibes in this Social App! 🚀 #UIUX #MobileDesign',
+    image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=800',
+    likesCount: 124,
+    commentsCount: 15,
+    timestamp: '2h ago',
+  },
+  {
+    id: 'mock_2',
+    userId: 102,
+    username: 'ReactDev',
+    profilePic: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200',
+    content: 'Just finished integrating SQLite for local storage. Everything is super fast! ⚡',
+    image: null,
+    likesCount: 89,
+    commentsCount: 5,
+    timestamp: '5h ago',
+  },
+  {
+    id: 'mock_3',
+    userId: 103,
+    username: 'TechVibe',
+    profilePic: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200',
+    content: 'Always remember: Clean code is not written, it is rewritten. Keep coding! 💻✨',
+    image: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=800',
+    likesCount: 256,
+    commentsCount: 42,
+    timestamp: '1d ago',
+  }
+];

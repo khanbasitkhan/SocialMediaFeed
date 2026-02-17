@@ -1,28 +1,28 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Dimensions,
   Alert,
-  Modal,
-  TextInput,
-  KeyboardAvoidingView,
-  Platform,
+  Dimensions,
   FlatList,
+  Image,
+  KeyboardAvoidingView,
+  Modal,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { useSelector } from 'react-redux';
 import { theme } from '../config/theme';
-import { commonStyles } from '../shared/styles/commonStyles';
 import {
-  toggleLike,
   addComment,
   deletePost,
   getCommentsByPost,
+  toggleLike,
 } from '../services/dbServices';
+import { commonStyles } from '../shared/styles/commonStyles';
 
 const { width, height } = Dimensions.get('window');
 
@@ -41,6 +41,7 @@ const PostCard = ({ post }) => {
     try {
       const data = await getCommentsByPost(post.id);
       setCommentsList(data);
+      
     } catch (error) {
       console.log('Error loading comments:', error);
     }
@@ -100,8 +101,8 @@ const PostCard = ({ post }) => {
     <View style={styles.commentItem}>
       <View style={styles.commentTextContainer}>
         <Text style={styles.commentUser}>{item.username || 'Anonymous'}</Text>
-        <Text style={styles.commentContentText}>{item.content}</Text>
-        {console.log(item.content)}
+        <Text style={styles.commentContentText}>{item.commentText}</Text>
+        {console.log(item.commentText)}
         
       </View>
     </View>

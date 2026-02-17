@@ -21,6 +21,7 @@ import {
   deletePost,
   getCommentsByPost,
   toggleLike,
+  checkIsLiked
 } from '../services/dbServices';
 import { commonStyles } from '../shared/styles/commonStyles';
 
@@ -36,6 +37,21 @@ const PostCard = ({ post }) => {
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [commentsList, setCommentsList] = useState([]);
+
+  useEffect(() => {
+    const fetchLikeStatus = async () => {
+      if (currentUser && post.id) {
+        try {
+          const isLiked = await checkIsLiked(currentUser.id, post.id);
+          setLiked(isLiked); 
+        } catch (error) {
+          console.log('Error fetching like status:', error);
+        }
+      }
+    };
+
+    fetchLikeStatus();
+  }, [post, currentUser]);
 
   const loadComments = useCallback(async () => {
     try {

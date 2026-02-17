@@ -406,3 +406,23 @@ export const deletePost = (postId) => {
     });
   });
 };
+
+
+export const checkIsLiked = (userId, postId) => {
+  return new Promise((resolve, reject) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'SELECT * FROM likes WHERE userId = ? AND postId = ?',
+        [userId, postId],
+        (_, { rows }) => {
+          if (rows.length > 0) {
+            resolve(true); 
+          } else {
+            resolve(false);
+          }
+        },
+        (_, error) => reject(error)
+      );
+    });
+  });
+};

@@ -9,6 +9,7 @@ import {
   RefreshControl,
 } from 'react-native';
 import { useSelector } from 'react-redux';
+import { useIsFocused } from '@react-navigation/native';
 import { theme } from '../../config/theme';
 import { commonStyles } from '../../shared/styles/commonStyles';
 import PostCard from '../../components/PostCard';
@@ -19,6 +20,7 @@ const FeedScreen = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
   const currentUser = useSelector(state => state.auth.user);
+  const isFocused = useIsFocused();
 
   const fetchFeedData = useCallback(async () => {
     try {
@@ -29,9 +31,14 @@ const FeedScreen = ({ navigation }) => {
     }
   }, [currentUser?.id]);
 
+  // useEffect(() => {
+  //   fetchFeedData();
+  // }, [fetchFeedData]);
   useEffect(() => {
-    fetchFeedData();
-  }, [fetchFeedData]);
+    if (isFocused) {
+      fetchFeedData(); 
+    }
+  }, [isFocused, fetchFeedData]);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);

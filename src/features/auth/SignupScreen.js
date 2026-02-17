@@ -72,7 +72,7 @@ const SignupScreen = ({ navigation }) => {
         <Text style={styles.title}>Create Account</Text>
         <Text style={styles.subtitle}>Join our community today</Text>
 
-        {/* Profile Image Section */}
+        
         <View style={styles.imagePickerContainer}>
           <TouchableOpacity style={styles.imagePicker} onPress={pickImage}>
             <Image
@@ -214,7 +214,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: -2, // Vertical alignment fix
+    marginTop: -2, 
   },
   inputContainer: {
     width: '100%',

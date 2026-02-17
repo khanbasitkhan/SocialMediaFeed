@@ -57,10 +57,13 @@ const CreatePostScreen = ({ navigation }) => {
       Alert.alert('Success', 'Your post is live!', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
+
     } catch (error) {
       Alert.alert('Error', 'Failed to create post. Please try again.');
     } finally {
       setLoading(false);
+      setContent('')
+      setImage(null)
     }
   };
 

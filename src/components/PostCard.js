@@ -328,7 +328,7 @@
 
 // export default PostCard;
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   View,
   Text,
@@ -337,14 +337,24 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  FlatList,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/AntDesign';
 import { useSelector } from 'react-redux';
 import { theme } from '../config/theme';
 import { commonStyles } from '../shared/styles/commonStyles';
-import { toggleLike, addComment, deletePost } from '../services/dbServices';
+import {
+  toggleLike,
+  addComment,
+  deletePost,
+  getCommentsByPost,
+} from '../services/dbServices';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 const PostCard = ({ post }) => {
   const currentUser = useSelector(state => state.auth.user);
@@ -353,7 +363,25 @@ const PostCard = ({ post }) => {
   const [commentsCount, setCommentsCount] = useState(post.commentsCount || 0);
   const [isVisible, setIsVisible] = useState(true);
 
-  
+  const [commentModalVisible, setCommentModalVisible] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [commentsList, setCommentsList] = useState([]);
+
+  const loadComments = useCallback(async () => {
+    try {
+      const data = await getCommentsByPost(post.id);
+      setCommentsList(data);
+    } catch (error) {
+      console.log('Error loading comments:', error);
+    }
+  }, [post.id]);
+
+  useEffect(() => {
+    if (commentModalVisible) {
+      loadComments();
+    }
+  }, [commentModalVisible, loadComments]);
+
   if (!isVisible) return null;
 
   const handleLike = async () => {
@@ -375,7 +403,7 @@ const PostCard = ({ post }) => {
         onPress: async () => {
           try {
             await deletePost(post.id);
-            setIsVisible(false); 
+            setIsVisible(false);
             Alert.alert('Deleted', 'Post has been removed successfully');
           } catch (error) {
             Alert.alert('Error', 'Could not delete post');
@@ -385,30 +413,29 @@ const PostCard = ({ post }) => {
     ]);
   };
 
-  const handleComment = () => {
-    Alert.prompt(
-      'Add Comment',
-      'Write your thought on this post:',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Post',
-          onPress: async text => {
-            if (text && text.trim().length > 0) {
-              try {
-                await addComment(currentUser.id, post.id, text);
-                setCommentsCount(prev => prev + 1);
-                Alert.alert('Success', 'Comment added!');
-              } catch (error) {
-                Alert.alert('Error', 'Could not add comment');
-              }
-            }
-          },
-        },
-      ],
-      'plain-text',
-    );
+  const submitComment = async () => {
+    if (newComment.trim().length > 0) {
+      try {
+        await addComment(currentUser.id, post.id, newComment);
+        setCommentsCount(prev => prev + 1);
+        setNewComment('');
+        loadComments();
+      } catch (error) {
+        Alert.alert('Error', 'Could not add comment');
+      }
+    }
   };
+
+  const renderCommentItem = ({ item }) => (
+    <View style={styles.commentItem}>
+      <View style={styles.commentTextContainer}>
+        <Text style={styles.commentUser}>{item.username || 'Anonymous'}</Text>
+        <Text style={styles.commentContentText}>{item.content}</Text>
+        {console.log(item.content)}
+        
+      </View>
+    </View>
+  );
 
   return (
     <View style={[commonStyles.card, styles.container]}>
@@ -432,7 +459,6 @@ const PostCard = ({ post }) => {
           </View>
         </View>
 
-        
         {currentUser?.id === post.userId && (
           <TouchableOpacity onPress={handleDelete} style={styles.deleteBtn}>
             <Icon name="delete" size={18} color="red" />
@@ -468,7 +494,10 @@ const PostCard = ({ post }) => {
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={handleComment}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => setCommentModalVisible(true)}
+        >
           <Icon name="message1" size={20} color={theme.colors.subtext} />
           <Text style={styles.actionText}>{commentsCount}</Text>
         </TouchableOpacity>
@@ -478,6 +507,75 @@ const PostCard = ({ post }) => {
           <Text style={styles.actionText}>Share</Text>
         </TouchableOpacity>
       </View>
+
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={commentModalVisible}
+        onRequestClose={() => setCommentModalVisible(false)}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>Comments</Text>
+              <TouchableOpacity onPress={() => setCommentModalVisible(false)}>
+                <Icon name="close" size={24} color={theme.colors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <FlatList
+              data={commentsList}
+              renderItem={renderCommentItem}
+              keyExtractor={(item, index) => index.toString()}
+              style={styles.commentsList}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No comments yet.</Text>
+              }
+            />
+
+            <View style={styles.commentInputWrapper}>
+              <View style={styles.commentInputContainer}>
+                <Image
+                  source={
+                    currentUser?.profilePic
+                      ? { uri: currentUser.profilePic }
+                      : require('../assets/images/Social Media Feed App.png')
+                  }
+                  style={styles.smallAvatar}
+                />
+                <TextInput
+                  style={styles.input}
+                  placeholder="Add a comment..."
+                  placeholderTextColor={theme.colors.subtext}
+                  value={newComment}
+                  onChangeText={setNewComment}
+                  multiline
+                />
+                <TouchableOpacity
+                  onPress={submitComment}
+                  disabled={!newComment.trim()}
+                >
+                  <Text
+                    style={[
+                      styles.postBtnText,
+                      {
+                        color: newComment.trim()
+                          ? theme.colors.primary
+                          : theme.colors.subtext,
+                      },
+                    ]}
+                  >
+                    Post
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
     </View>
   );
 };
@@ -491,7 +589,7 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between', // Change to allow delete icon on right
+    justifyContent: 'space-between',
     marginBottom: theme.spacing.s,
   },
   headerLeft: {
@@ -545,6 +643,94 @@ const styles = StyleSheet.create({
   },
   boldText: {
     fontWeight: 'bold',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'flex-end',
+  },
+  modalContent: {
+    backgroundColor: theme.colors.background,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 20,
+    height: height * 0.7,
+  },
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: theme.colors.text,
+  },
+  commentsList: {
+    flex: 1,
+  },
+  commentItem: {
+    flexDirection: 'row',
+    marginBottom: 10,
+    alignItems: 'flex-start',
+  },
+  commentTextContainer: {
+    backgroundColor: theme.colors.surface,
+    padding: 10,
+    borderRadius: 15,
+    flex: 1,
+    elevation: 1,
+  },
+  commentUser: {
+    fontWeight: 'bold',
+    fontSize: 13,
+    color: theme.colors.primary,
+    marginBottom: 2,
+  },
+  commentContentText: {
+    fontSize: 14,
+    color: theme.colors.text,
+    lineHeight: 18,
+  },
+  commentInputWrapper: {
+    paddingTop: 10,
+    borderTopWidth: 1,
+    borderTopColor: theme.colors.border,
+  },
+  commentInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: theme.colors.surface,
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  smallAvatar: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+  },
+  input: {
+    flex: 1,
+    marginHorizontal: 10,
+    maxHeight: 100,
+    color: theme.colors.text,
+    fontSize: 15,
+  },
+  postBtnText: {
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  emptyText: {
+    textAlign: 'center',
+    color: theme.colors.subtext,
+    marginTop: 20,
   },
 });
 

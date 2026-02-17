@@ -478,7 +478,7 @@ const ProfileScreen = ({ navigation }) => {
   const user = useSelector(state => state.auth.user);
   const dispatch = useDispatch();
 
-  // States for Editing
+
   const [isEditing, setIsEditing] = useState(false);
   const [updatedName, setUpdatedName] = useState(user?.username || '');
   const [updatedPhone, setUpdatedPhone] = useState(user?.phone || '');
@@ -531,7 +531,7 @@ const ProfileScreen = ({ navigation }) => {
       }
       await updateUserProfile(user.id, updatedName, updatedPhone, updatedPic);
 
-      // Update Redux state
+      
       const updatedUserData = {
         ...user,
         username: updatedName,
@@ -551,7 +551,7 @@ const ProfileScreen = ({ navigation }) => {
   return (
     <ScrollView style={commonStyles.safeArea}>
       <View style={styles.header}>
-        {/* Top Buttons */}
+       
         <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
           <Icon name="logout" size={20} color="red" />
         </TouchableOpacity>

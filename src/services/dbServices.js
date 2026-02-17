@@ -426,3 +426,37 @@ export const checkIsLiked = (userId, postId) => {
     });
   });
 };
+
+export const deleteComment = (commentId, postId) => {
+  return new Promise((resolve, reject) => {
+    db.transaction(
+      tx => {
+        
+        tx.executeSql(
+          'DELETE FROM comments WHERE id = ?',
+          [commentId]
+        );
+        
+        
+        tx.executeSql(
+          'UPDATE posts SET commentsCount = MAX(0, commentsCount - 1) WHERE id = ?',
+          [postId]
+        );
+      },
+      err => reject(err), 
+      () => resolve()    
+    );
+  });
+};
+export const updateComment = (commentId, newText) => {
+  return new Promise((resolve, reject) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        'UPDATE comments SET commentText = ? WHERE id = ?',
+        [newText, commentId],
+        (_, result) => resolve(result),
+        (_, error) => reject(error)
+      );
+    });
+  });
+};

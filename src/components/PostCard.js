@@ -21,7 +21,9 @@ import {
   deletePost,
   getCommentsByPost,
   toggleLike,
-  checkIsLiked
+  checkIsLiked,
+  deleteComment,
+  updateComment
 } from '../services/dbServices';
 import { commonStyles } from '../shared/styles/commonStyles';
 
@@ -37,6 +39,8 @@ const PostCard = ({ post }) => {
   const [commentModalVisible, setCommentModalVisible] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [commentsList, setCommentsList] = useState([]);
+  const [editingCommentId, setEditingCommentId] = useState(null);
+  const [editText, setEditText] = useState('');
 
   useEffect(() => {
     const fetchLikeStatus = async () => {
@@ -57,6 +61,7 @@ const PostCard = ({ post }) => {
     try {
       const data = await getCommentsByPost(post.id);
       setCommentsList(data);
+      console.log(data)
       
     } catch (error) {
       console.log('Error loading comments:', error);
@@ -113,16 +118,98 @@ const PostCard = ({ post }) => {
     }
   };
 
-  const renderCommentItem = ({ item }) => (
+  // const renderCommentItem = ({ item }) => (
+  //   <View style={styles.commentItem}>
+  //     <View style={styles.commentTextContainer}>
+  //       <Text style={styles.commentUser}>{item.username || 'Anonymous'}</Text>
+  //       <Text style={styles.commentContentText}>{item.commentText}</Text>
+  //       {console.log(item.commentText)}
+        
+  //     </View>
+  //   </View>
+  // );
+  const renderCommentItem = ({ item }) => {
+  const isPostOwner = currentUser?.id === post.userId;
+  const isCommentOwner = currentUser?.id === item.userId;
+
+  return (
     <View style={styles.commentItem}>
       <View style={styles.commentTextContainer}>
-        <Text style={styles.commentUser}>{item.username || 'Anonymous'}</Text>
-        <Text style={styles.commentContentText}>{item.commentText}</Text>
-        {console.log(item.commentText)}
-        
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+          <Text style={styles.commentUser}>{item.username}</Text>
+          
+          <View style={{ flexDirection: 'row' }}>
+            
+            {isCommentOwner && (
+              <TouchableOpacity onPress={() => {
+                setEditingCommentId(item.id);
+                setEditText(item.commentText);
+              }}>
+                <Icon name="edit" size={16} color={theme.colors.primary} style={{ marginRight: 10 }} />
+              </TouchableOpacity>
+            )}
+
+            
+            {(isPostOwner || isCommentOwner) && (
+              <TouchableOpacity onPress={() => handleDeleteComment(item.id)}>
+                <Icon name="delete" size={16} color="red" />
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+
+        {editingCommentId === item.id ? (
+          <View>
+            <TextInput
+              style={styles.editInput}
+              value={editText}
+              onChangeText={setEditText}
+              autoFocus
+            />
+            <TouchableOpacity onPress={handleEditComment}>
+              <Text style={{ color: theme.colors.primary, fontWeight: 'bold', marginTop: 5 }}>Save</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Text style={styles.commentContentText}>{item.commentText}</Text>
+        )}
       </View>
     </View>
   );
+};
+ const handleDeleteComment = (commentId) => {
+  Alert.alert('Delete Comment', 'Are You Sure to Delete This Comment', [
+    { text: 'Cancel', style: 'cancel' },
+    {
+      text: 'Delete',
+      style: 'destructive',
+      onPress: async () => {
+        try {
+         
+          await deleteComment(commentId, post.id); 
+          
+         
+          setCommentsCount(prev => Math.max(0, prev - 1));
+          loadComments();
+        } catch (error) {
+          Alert.alert('Error', 'Comment Cannot be Deleted');
+        }
+      },
+    },
+  ]);
+};
+const handleEditComment = async () => {
+  if (editText.trim()) {
+    try {
+      await updateComment(editingCommentId, editText);
+      setEditingCommentId(null);
+      setEditText('');
+      loadComments();
+    } catch (error) {
+      Alert.alert('Error', 'Comment Not Updated');
+    }
+  }
+};
 
   return (
     <View style={[commonStyles.card, styles.container]}>

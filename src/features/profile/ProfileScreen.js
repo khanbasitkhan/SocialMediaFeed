@@ -91,185 +91,280 @@ const ProfileScreen = ({ navigation }) => {
       console.log(error);
     }
   };
+ return (
+    <View style={commonStyles.safeArea}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.headerContainer}>
+          
+         
+          <View style={styles.actionRow}>
+            {isEditing ? (
+              
+              <>
+                <TouchableOpacity 
+                  style={[styles.iconCircle, {backgroundColor: '#feebea'}]} 
+                  onPress={() => {
+                    setIsEditing(false);
+                    setUpdatedName(user.username);
+                    setUpdatedPhone(user.phone);
+                    setUpdatedPic(user.profilePic);
+                  }}
+                >
+                  <Icon name="close" size={20} color="#d32f2f" />
+                </TouchableOpacity>
 
-  return (
-    <ScrollView style={commonStyles.safeArea}>
-      <View style={styles.header}>
-       
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-          <Icon name="logout" size={20} color="red" />
-        </TouchableOpacity>
+                <TouchableOpacity 
+                  style={[styles.iconCircle, {backgroundColor: '#e8f5e9'}]} 
+                  onPress={handleUpdate}
+                >
+                  <Icon name="check" size={20} color="#2e7d32" />
+                </TouchableOpacity>
+              </>
+            ) : (
+              
+              <>
+                <TouchableOpacity style={styles.iconCircle} onPress={() => setIsEditing(true)}>
+                  <Icon name="edit" size={18} color={theme.colors.primary} />
+                </TouchableOpacity>
+                
+                <TouchableOpacity style={styles.iconCircle} onPress={handleLogout}>
+                  <Icon name="logout" size={18} color="red" />
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
 
-        <TouchableOpacity
-          style={styles.editBtn}
-          onPress={() => (isEditing ? handleUpdate() : setIsEditing(true))}
-        >
-          <Icon
-            name={isEditing ? 'check' : 'edit'}
-            size={20}
-            color={theme.colors.primary}
-          />
-        </TouchableOpacity>
+          <View style={styles.profileInfo}>
+            <TouchableOpacity onPress={pickImage} activeOpacity={0.8} style={styles.avatarWrapper}>
+              <Image
+                source={updatedPic ? { uri: updatedPic } : require('../../assets/images/Social Media Feed App.png')}
+                style={[styles.avatar, isEditing && styles.editingAvatar]}
+              />
+              {isEditing && (
+                <View style={styles.cameraBadge}>
+                  <Icon name="camera" size={16} color="#fff" />
+                </View>
+              )}
+            </TouchableOpacity>
 
-        <View style={styles.profileInfo}>
-          <TouchableOpacity onPress={pickImage} activeOpacity={0.7}>
-            <Image
-              source={
-                updatedPic
-                  ? { uri: updatedPic }
-                  : require('../../assets/images/Social Media Feed App.png')
-              }
-              style={[styles.avatar, isEditing && styles.editingAvatar]}
-            />
-            {isEditing && (
-              <View style={styles.cameraIconBadge}>
-                <Icon name="camera" size={14} color="#fff" />
+            {isEditing ? (
+              <View style={styles.editForm}>
+                <TextInput
+                  style={styles.input}
+                  value={updatedName}
+                  onChangeText={setUpdatedName}
+                  placeholder="Username"
+                  placeholderTextColor="#999"
+                  autoFocus
+                />
+                <TextInput
+                  style={styles.input}
+                  value={updatedPhone}
+                  onChangeText={setUpdatedPhone}
+                  placeholder="Phone"
+                  keyboardType="phone-pad"
+                  placeholderTextColor="#999"
+                />
+              </View>
+            ) : (
+              <View style={{alignItems: 'center'}}>
+                <Text style={styles.userName}>{user?.username || 'User Name'}</Text>
+                <View style={styles.phoneBadge}>
+                  <Icon name="phone" size={12} color={theme.colors.subtext} />
+                  <Text style={styles.phoneText}>{user?.phone || 'No Phone'}</Text>
+                </View>
               </View>
             )}
-          </TouchableOpacity>
+          </View>
+        </View>
 
-          {isEditing ? (
-            <View style={styles.editForm}>
-              <TextInput
-                style={styles.input}
-                value={updatedName}
-                onChangeText={setUpdatedName}
-                placeholder="Username"
-              />
-              <TextInput
-                style={styles.input}
-                value={updatedPhone}
-                onChangeText={setUpdatedPhone}
-                placeholder="Phone"
-                keyboardType="phone-pad"
-              />
+        
+        <View style={styles.contentBody}>
+          <Text style={styles.sectionTitle}>Post Analytics</Text>
+          <View style={styles.statsRow}>
+            <View style={styles.statCard}>
+               <View style={[styles.iconBox, {backgroundColor: '#ffebee'}]}>
+                  <Icon name="heart" size={22} color="#f44336" />
+               </View>
+               <Text style={styles.statNumber}>{analytics.totalLikes}</Text>
+               <Text style={styles.statLabel}>Likes</Text>
             </View>
-          ) : (
-            <>
-              <Text style={styles.userName}>
-                {user?.username || 'User Name'}
-              </Text>
-              <Text style={commonStyles.subText}>
-                {user?.phone || 'No Phone'}
-              </Text>
-            </>
-          )}
-        </View>
-      </View>
 
-      <View style={styles.analyticsSection}>
-        <Text style={styles.sectionTitle}>Post Analytics</Text>
-        <View style={styles.statsContainer}>
-          <View
-            style={[styles.statCard, { borderLeftColor: theme.colors.primary }]}
-          >
-            <Icon name="heart" size={24} color={theme.colors.primary} />
-            <Text style={styles.statNumber}>{analytics.totalLikes}</Text>
-            <Text style={styles.statLabel}>Total Likes</Text>
-          </View>
-
-          <View
-            style={[
-              styles.statCard,
-              { borderLeftColor: theme.colors.secondary },
-            ]}
-          >
-            <Icon name="message1" size={24} color={theme.colors.secondary} />
-            <Text style={styles.statNumber}>{analytics.totalComments}</Text>
-            <Text style={styles.statLabel}>Total Comments</Text>
+            <View style={styles.statCard}>
+               <View style={[styles.iconBox, {backgroundColor: '#e3f2fd'}]}>
+                  <Icon name="message1" size={22} color="#2196f3" />
+               </View>
+               <Text style={styles.statNumber}>{analytics.totalComments}</Text>
+               <Text style={styles.statLabel}>Comments</Text>
+            </View>
           </View>
         </View>
-      </View>
-
-      {isEditing && (
-        <TouchableOpacity
-          style={styles.cancelBtn}
-          onPress={() => {
-            setIsEditing(false);
-            setUpdatedName(user.username);
-            setUpdatedPhone(user.phone);
-            setUpdatedPic(user.profilePic);
-          }}
-        >
-          <Text style={{ color: 'gray' }}>Cancel Editing</Text>
-        </TouchableOpacity>
-      )}
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  header: {
-    padding: 30,
+  headerContainer: {
+    paddingTop: 50,
+    paddingBottom: 30,
     backgroundColor: theme.colors.surface,
-    alignItems: 'center',
-    borderBottomLeftRadius: 30,
-    borderBottomRightRadius: 30,
-    elevation: 5,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
+    elevation: 8,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
-  logoutBtn: { position: 'absolute', right: 20, top: 20 },
-  editBtn: { position: 'absolute', left: 20, top: 20 },
-  profileInfo: { alignItems: 'center', width: '100%' },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    borderWidth: 4,
-    borderColor: theme.colors.primary,
-    marginBottom: 15,
-  },
-  editingAvatar: {
-    opacity: 0.6,
-    borderColor: theme.colors.secondary,
-  },
-  cameraIconBadge: {
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 25,
     position: 'absolute',
-    bottom: 20,
-    right: 5,
-    backgroundColor: theme.colors.primary,
-    padding: 6,
-    borderRadius: 12,
+    top: 20,
+    width: '100%',
+    zIndex: 10,
   },
-  userName: { fontSize: 24, fontWeight: 'bold', color: theme.colors.text },
-  editForm: { width: '80%', marginTop: 10 },
-  input: {
-    borderBottomWidth: 1,
-    borderBottomColor: theme.colors.primary,
-    marginBottom: 10,
-    textAlign: 'center',
-    fontSize: 16,
-    color: theme.colors.text,
-    padding: 5,
-  },
-  analyticsSection: { padding: 20, marginTop: 10 },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 15,
-    color: theme.colors.text,
-  },
-  statsContainer: { flexDirection: 'row', justifyContent: 'space-between' },
-  statCard: {
-    width: '47%',
-    backgroundColor: theme.colors.surface,
-    padding: 20,
-    borderRadius: 15,
+  iconCircle: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
     alignItems: 'center',
     elevation: 3,
-    borderLeftWidth: 5,
+  },
+  profileInfo: {
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  avatarWrapper: {
+    position: 'relative',
+    shadowColor: theme.colors.primary,
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  avatar: {
+    width: 130,
+    height: 130,
+    borderRadius: 65,
+    borderWidth: 5,
+    borderColor: '#fff',
+  },
+  editingAvatar: {
+    borderColor: theme.colors.primary,
+    opacity: 0.8,
+  },
+  cameraBadge: {
+    position: 'absolute',
+    bottom: 5,
+    right: 5,
+    backgroundColor: theme.colors.primary,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 3,
+    borderColor: '#fff',
+  },
+  userName: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: theme.colors.text,
+    marginTop: 15,
+    letterSpacing: 0.5,
+  },
+  phoneBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 15,
+    marginTop: 5,
+  },
+  phoneText: {
+    fontSize: 14,
+    color: theme.colors.subtext,
+    marginLeft: 5,
+  },
+  editForm: {
+    width: '80%',
+    marginTop: 15,
+  },
+  input: {
+    backgroundColor: '#f8f9fa',
+    borderRadius: 12,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    marginBottom: 10,
+    fontSize: 16,
+    color: theme.colors.text,
+    borderWidth: 1,
+    borderColor: '#eee',
+    textAlign: 'center'
+  },
+  contentBody: {
+    padding: 25,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: theme.colors.text,
+    marginBottom: 20,
+  },
+  statsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  statCard: {
+    width: '47%',
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20,
+    alignItems: 'center',
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 5,
+  },
+  iconBox: {
+    width: 45,
+    height: 45,
+    borderRadius: 12,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 10,
   },
   statNumber: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginVertical: 5,
+    fontSize: 24,
+    fontWeight: '800',
     color: theme.colors.text,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 13,
     color: theme.colors.subtext,
-    textTransform: 'uppercase',
+    marginTop: 2,
+    fontWeight: '500',
   },
-  cancelBtn: { alignSelf: 'center', marginTop: 20, padding: 10 },
+  cancelButtonFull: {
+    marginTop: 30,
+    backgroundColor: '#feebea',
+    padding: 15,
+    borderRadius: 15,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ffcdd2',
+  },
+  cancelButtonText: {
+    color: '#d32f2f',
+    fontWeight: '700',
+    fontSize: 15,
+  },
 });
 
 export default ProfileScreen;

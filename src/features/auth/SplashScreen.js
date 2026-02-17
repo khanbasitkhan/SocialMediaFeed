@@ -1,41 +1,46 @@
-import React, { useEffect } from 'react';
-import { View, Image, StyleSheet, StatusBar, Dimensions } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-  withSpring,
-} from 'react-native-reanimated';
+import React, { useEffect, useRef } from 'react';
+import { 
+  View, 
+  Image, 
+  StyleSheet, 
+  StatusBar, 
+  Dimensions, 
+  Animated 
+} from 'react-native';
 import { theme } from '../../config/theme';
 import { initDatabase } from '../../services/dbServices';
 
 const { width } = Dimensions.get('window');
 
 const SplashScreen = ({ navigation }) => {
-  const opacity = useSharedValue(0);
-  const scale = useSharedValue(0.5);
+  
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.5)).current;
 
   useEffect(() => {
+    
     initDatabase();
 
-    opacity.value = withTiming(1, { duration: 1000 });
-    scale.value = withSpring(1);
+    
+    Animated.parallel([
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 1000,
+        useNativeDriver: true, 
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        friction: 4,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
     const timer = setTimeout(() => {
       navigation.replace('Signup');
     }, 2500);
 
     return () => clearTimeout(timer);
-  }, [navigation, opacity, scale]);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-    transform: [{ scale: scale.value }],
-  }));
-
-  const animatedTextStyle = useAnimatedStyle(() => ({
-    opacity: opacity.value,
-  }));
+  }, [navigation, fadeAnim, scaleAnim]);
 
   return (
     <View style={styles.container}>
@@ -45,10 +50,20 @@ const SplashScreen = ({ navigation }) => {
         barStyle="dark-content"
       />
 
+      
       <View style={[styles.circle, styles.topCircle]} />
       <View style={[styles.circle, styles.bottomCircle]} />
 
-      <Animated.View style={[styles.logoContainer, animatedStyle]}>
+      
+      <Animated.View 
+        style={[
+          styles.logoContainer, 
+          { 
+            opacity: fadeAnim, 
+            transform: [{ scale: scaleAnim }] 
+          }
+        ]}
+      >
         <Image
           source={require('../../assets/images/Social Media Feed App.png')}
           style={styles.logo}
@@ -56,7 +71,8 @@ const SplashScreen = ({ navigation }) => {
         />
       </Animated.View>
 
-      <Animated.Text style={[styles.tagline, animatedTextStyle]}>
+      
+      <Animated.Text style={[styles.tagline, { opacity: fadeAnim }]}>
         Connect • Share • Grow
       </Animated.Text>
     </View>

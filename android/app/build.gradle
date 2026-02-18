@@ -70,6 +70,7 @@ def enableProguardInReleaseBuilds = false
  * give correct results when using with locales other than en-US. Note that
  * this variant is about 6MiB larger per architecture than default.
  */
+ def enableSeparateBuildPerCPUArchitecture = true
 def jscFlavor = 'io.github.react-native-community:jsc-android:2026004.+'
 
 android {
@@ -93,15 +94,30 @@ android {
             keyPassword 'android'
         }
     }
+    // buildTypes {
+    //     debug {
+    //         signingConfig signingConfigs.debug
+    //     }
+    //     release {
+    //         // Caution! In production, you need to generate your own keystore file.
+    //         // see https://reactnative.dev/docs/signed-apk-android.
+    //         signingConfig signingConfigs.debug
+    //         minifyEnabled enableProguardInReleaseBuilds
+    //         proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+    //     }
+    // }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
+            
+            // Ye 2 lines size mazeed kam karengi
+            shrinkResources false
+            zipAlignEnabled true
+            
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
     }

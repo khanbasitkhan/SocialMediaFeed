@@ -8,3 +8,17 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+
+-keep class com.facebook.react.common.build.ReactBuildConfig { *; }
+
+
+-keep class com.oblador.vectoricons.** { *; }
+
+
+-keep class org.pgsqlite.** { *; }
+
+
+-keep class com.swmansion.reanimated.** { *; }
+-keep interface com.swmansion.reanimated.** { *; }
+-keep class com.facebook.react.bridge.WritableNativeMap { *; }
+-keep class com.facebook.react.bridge.ReadableNativeMap { *; }

@@ -255,7 +255,18 @@ export const registerUser = (username, gender, phone, password, profilePic) => {
     });
   });
 };
-
+ const checkIfUserExists = (id) => {
+    return new Promise((resolve) => {
+      db.transaction(tx => {
+        tx.executeSql(
+          'SELECT * FROM users WHERE username = ? OR phone = ?',
+          [id, id],
+          (_, { rows }) => resolve(rows.length > 0),
+          () => resolve(false)
+        );
+      });
+    });
+  };
 export const loginUser = (identifier, password) => {
   return new Promise((resolve, reject) => {
     db.transaction(tx => {

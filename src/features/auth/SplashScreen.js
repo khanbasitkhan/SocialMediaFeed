@@ -35,7 +35,7 @@ const SplashScreen = ({ navigation, isInitialLoading }) => {
 
     if (navigation && !isInitialLoading) {
       const timer = setTimeout(() => {
-        navigation.replace('Login');
+        navigation.replace("Login");
       }, 2500);
       return () => clearTimeout(timer);
     }

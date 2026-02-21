@@ -41,6 +41,7 @@ const LoginScreen = ({ navigation }) => {
         dispatch(setUser(user));
       } else {
         Alert.alert('Error', 'Invalid credentials');
+        navigation.navigate('Signup')
       }
     } catch (error) {
       Alert.alert('Error', 'Something went wrong during login');

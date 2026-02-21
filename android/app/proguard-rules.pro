@@ -22,3 +22,5 @@
 -keep interface com.swmansion.reanimated.** { *; }
 -keep class com.facebook.react.bridge.WritableNativeMap { *; }
 -keep class com.facebook.react.bridge.ReadableNativeMap { *; }
+-keep class com.facebook.soloader.** { *; }
+-keep class com.facebook.react.runtime.** { *; }
